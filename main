@@ -193,6 +193,25 @@ void spinMotorR(int motorSpeedR);
         motorSpeedL = SPEEDl + 1.4*TURN;
     }
 
+    else if(center.read() > LINETHRESHOLDc && left.read() > LINETHRESHOLDl)
+      {
+          Highway = 0;
+          Serial.print("exiting");
+          motorSpeedR = 1.1*SPEEDr;
+          motorSpeedL = .9*SPEEDl;
+          delay(500);
+      }
+     else if(Dis2.read() < safedistF)
+     {
+          Highway = 0;
+          Serial.print("blocked");
+          motorSpeedR = SPEEDr;
+          motorSpeedL = -SPEEDl;
+          delay(1500);
+     }
+     
+      }
+
 
 
 //If all three sensors are black, then move fast (highway)
@@ -226,6 +245,7 @@ void spinMotorR(int motorSpeedR);
         motorSpeedR = 1.2*SPEEDr;
         Serial.println("Highway left fix");
       }
+      
 
   //  if(center.read() > LINETHRESHOLDc &&)
    // {
