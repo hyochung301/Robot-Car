@@ -24,13 +24,13 @@ RedBotSensor Distl = RedBotSensor(A2);
 #define LINETHRESHOLDl 980      //good 990
 #define LINETHRESHOLDr 800      //good 700
 #define LINETHRESHOLDc 980      //good 850
-#define SPEEDr 140    // sets the nominal speed. Set to any number from 0 - 255. 90
-#define SPEEDl 145       //
-#define TURN 45         //good 45
+#define SPEEDr 170*0    // sets the nominal speed. Set to any number from 0 - 255.  //140
+#define SPEEDl 175*0       //145
+#define TURN 45*0         //good 45
 
-//left sensor red: (870,920)
-//center sensor red: (885,925)
-//right sensor red: (480,590)
+//left sensor red: (800,920)
+//center sensor red: (770,925)
+//right sensor red: (0,590)
 
 RedBotMotors motors;
 int motorSpeedR = 0;
@@ -39,6 +39,7 @@ int motorSpeedL = 0;
 int Highway = 0;
 int Exits = 0;
 int Highwaycounter = 0;
+int STOP = 0;
 
 
 //int motorSpeedL;   // variable used to store the leftMotor speed. From line follower
@@ -141,6 +142,8 @@ void spinMotorR(int motorSpeedR);
     Serial.println(Highway);
     Serial.print("Highway counter: ");
     Serial.println(Highwaycounter);
+    Serial.print("STOP: ");
+    Serial.println(STOP);
     //Serial.print("\r");
     //Serial.println(motorSpeedL);
     //Serial.print("\r");
@@ -192,7 +195,7 @@ void spinMotorR(int motorSpeedR);
         motorSpeedR = 0 - 2.75*TURN; 
         motorSpeedL = SPEEDl + 1.4*TURN;
     }
-
+/*
     else if(center.read() > LINETHRESHOLDc && left.read() > LINETHRESHOLDl)
       {
           Highway = 0;
@@ -209,7 +212,7 @@ void spinMotorR(int motorSpeedR);
           motorSpeedL = -SPEEDl;
           delay(1500);
      }
-     
+     */
       }
 
 
@@ -221,30 +224,39 @@ void spinMotorR(int motorSpeedR);
         Highwaycounter ++;
         goto Highway;
        }
-
        
+    /* if(800 < left.read() && left.read() > 920 && 770 < center.read() && center.read() < 925 && 0 < right.read() && right.read() < 590)
+      {
+        Highway = 0;
+        STOP = 1;
+        motorSpeedR = 0;
+        motorSpeedL = 0;
+        delay(30000);
+      }
+       */
   Highway:
 
-   if(right.read() > LINETHRESHOLDr && center.read() > LINETHRESHOLDc && left.read() > LINETHRESHOLDl && Highway > 0)
+   if(right.read() > LINETHRESHOLDr && center.read() > LINETHRESHOLDc && left.read() > LINETHRESHOLDl && Highway == 1)
     {
         motorSpeedL = 1.2*SPEEDl; 
         motorSpeedR = 1.2*SPEEDr;
         Serial.println("Highway Forward");
     }
 
-    else if(right.read() > LINETHRESHOLDr && center.read() > LINETHRESHOLDc && Highway > 0)
+    else if(right.read() > LINETHRESHOLDr && center.read() > LINETHRESHOLDc && Highway == 1)
       {
         motorSpeedR = 1.2*SPEEDr - .5*TURN;
         motorSpeedL = 1.2*SPEEDl;
         Serial.println("Highway right fix");
       }
 
-    else if(left.read() > LINETHRESHOLDl && center.read() > LINETHRESHOLDc && Highway > 0)
+    else if(left.read() > LINETHRESHOLDl && center.read() > LINETHRESHOLDc && Highway == 1)
       {
         motorSpeedL = 1.2*SPEEDl - .5*TURN;
         motorSpeedR = 1.2*SPEEDr;
         Serial.println("Highway left fix");
       }
+      
       
 
   //  if(center.read() > LINETHRESHOLDc &&)
@@ -271,7 +283,8 @@ void spinMotorR(int motorSpeedR);
    //     motors.leftMotor(motorSpeedL);
   //      motors.rightMotor(motorSpeedR);
   
-  }
+  //}
+
     delay(50);  // add a delay to decrease sensitivity.
 
 }
