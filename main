@@ -12,7 +12,9 @@ int switchPin = 7;
 RedBotSensor right = RedBotSensor(A3);   // initialize a left sensor object on A3
 RedBotSensor center = RedBotSensor(A4); // initialize a center sensor object on A6
 RedBotSensor left = RedBotSensor(A5);  // initialize a right sensor object on A7
-
+RedBotSensor Distr = RedBotSensor(A0); 
+RedBotSensor Distc = RedBotSensor(A1);
+RedBotSensor Distl = RedBotSensor(A2);
 // constants that are used in the code. LINETHRESHOLD is the level to detect 
 // if the sensor is on the line or not. If the sensor value is greater than this
 // the sensor is above a DARK line.
@@ -22,13 +24,23 @@ RedBotSensor left = RedBotSensor(A5);  // initialize a right sensor object on A7
 #define LINETHRESHOLDl 980      //good 990
 #define LINETHRESHOLDr 800      //good 700
 #define LINETHRESHOLDc 980      //good 850
-#define SPEEDr 95    // sets the nominal speed. Set to any number from 0 - 255. 90
-#define SPEEDl 100       //
-#define TURN 45         //good 35
+#define SPEEDr 140    // sets the nominal speed. Set to any number from 0 - 255. 90
+#define SPEEDl 145       //
+#define TURN 45         //good 45
+
+//left sensor red: (870,920)
+//center sensor red: (885,925)
+//right sensor red: (480,590)
 
 RedBotMotors motors;
 int motorSpeedR = 0;
 int motorSpeedL = 0;
+
+int Highway = 0;
+int Exits = 0;
+int Highwaycounter = 0;
+
+
 //int motorSpeedL;   // variable used to store the leftMotor speed. From line follower
 //int motorSpeedR;  // variable used to store the rightMotor speed
 
@@ -60,14 +72,13 @@ void setup() {
 }
 
 void loop() {
+
   if(Serial.available() > 0){
+    
     motorSpeedR = Serial.parseInt();        
     motorSpeedL = Serial.parseInt();
 
-    Serial.print("Motor SpeedL: ");
-    Serial.println(motorSpeedL);
-    Serial.print("Motor SpeedR: ");
-    Serial.println(motorSpeedR);
+    
   }
   
 
@@ -122,6 +133,14 @@ void spinMotorR(int motorSpeedR);
     Serial.print("\t");  // tab character
     Serial.print(right.read());
     Serial.println();
+    Serial.print("Motor SpeedL: ");
+    Serial.println(motorSpeedL);
+    Serial.print("Motor SpeedR: ");
+    Serial.println(motorSpeedR);
+    Serial.print("Highway = ");
+    Serial.println(Highway);
+    Serial.print("Highway counter: ");
+    Serial.println(Highwaycounter);
     //Serial.print("\r");
     //Serial.println(motorSpeedL);
     //Serial.print("\r");
@@ -132,47 +151,93 @@ void spinMotorR(int motorSpeedR);
  
 
      //if on the line drive left and right at the same speed (left is CCW / right is CW)
-    if(center.read() > LINETHRESHOLDc)
+    if(center.read() > LINETHRESHOLDc && left.read() < LINETHRESHOLDl && right.read() < LINETHRESHOLDr)
     {
+      Highway = 0;
+        Serial.println("forward");
         motorSpeedL = SPEEDl; 
         motorSpeedR = SPEEDr;
     }
  // if the line is under the right sensor, adjust relative speeds to turn to the right
-    if(right.read() > LINETHRESHOLDr)
+    if(right.read() > LINETHRESHOLDr && left.read() < LINETHRESHOLDl && center.read() < LINETHRESHOLDc)
     {
+           Highway = 0;
+        Serial.println("right");
         motorSpeedL = (SPEEDl + TURN);
         motorSpeedR = (0);
     }
 
  // if the line is under the left sensor, adjust relative speeds to turn to the left
-    else if(left.read() > LINETHRESHOLDl)
+    else if(left.read() > LINETHRESHOLDl && right.read() < LINETHRESHOLDr && center.read() < LINETHRESHOLDc)
     {
+           Highway = 0;
+        Serial.println("left");
         motorSpeedL = (0);
         motorSpeedR = SPEEDr + TURN;
     }
 
  // if line is under the left and center sensor, make a sharp left turn
-   if(left.read() > LINETHRESHOLDl && center.read() > LINETHRESHOLDc)
+   if(left.read() > LINETHRESHOLDl && center.read() > LINETHRESHOLDc && right.read() < LINETHRESHOLDr)
     {
-        motorSpeedL = 0 - 2*TURN; 
-        motorSpeedR = SPEEDr + 1.2*TURN;
+           Highway = 0;
+        Serial.println("sharp left");
+        motorSpeedL = 0 - 2.75*TURN; 
+        motorSpeedR = SPEEDr + 1.4*TURN;
     }
  // if line is under the right and center sensor, make a sharp right turn
-   if(right.read() > LINETHRESHOLDr && center.read() > LINETHRESHOLDc)
+   if(right.read() > LINETHRESHOLDr && center.read() > LINETHRESHOLDc && left.read() < LINETHRESHOLDl)
     {
-        motorSpeedR = 0 - 2*TURN; 
-        motorSpeedL = SPEEDl + 1.2*TURN;
+           Highway = 0;
+        Serial.println("sharp right");
+        motorSpeedR = 0 - 2.75*TURN; 
+        motorSpeedL = SPEEDl + 1.4*TURN;
     }
 
 
 
 //If all three sensors are black, then move fast (highway)
     if(right.read() > LINETHRESHOLDr && center.read() > LINETHRESHOLDc && left.read() > LINETHRESHOLDl)
+       {
+        Highway = 1;
+        Highwaycounter ++;
+        goto Highway;
+       }
+
+       
+  Highway:
+
+   if(right.read() > LINETHRESHOLDr && center.read() > LINETHRESHOLDc && left.read() > LINETHRESHOLDl && Highway > 0)
+    {
+        motorSpeedL = 1.2*SPEEDl; 
+        motorSpeedR = 1.2*SPEEDr;
+        Serial.println("Highway Forward");
+    }
+
+    else if(right.read() > LINETHRESHOLDr && center.read() > LINETHRESHOLDc && Highway > 0)
       {
-            motorSpeedR = 2.5*SPEEDr;
-            motorSpeedL = 2.5*SPEEDl;
+        motorSpeedR = 1.2*SPEEDr - .5*TURN;
+        motorSpeedL = 1.2*SPEEDl;
+        Serial.println("Highway right fix");
       }
 
+    else if(left.read() > LINETHRESHOLDl && center.read() > LINETHRESHOLDc && Highway > 0)
+      {
+        motorSpeedL = 1.2*SPEEDl - .5*TURN;
+        motorSpeedR = 1.2*SPEEDr;
+        Serial.println("Highway left fix");
+      }
+
+  //  if(center.read() > LINETHRESHOLDc &&)
+   // {
+   //   Highway = 0;
+    //  Serial.println(Highway);
+     // Exits = 1;
+    //  Serial.println(Exits);
+    //    goto Exits
+    //}
+  
+ //Exits:
+ 
       
 
     // if all sensors are on black or up in the air, stop the motors.
@@ -185,7 +250,8 @@ void spinMotorR(int motorSpeedR);
   //  {
    //     motors.leftMotor(motorSpeedL);
   //      motors.rightMotor(motorSpeedR);
-}
-   
+  
+  }
     delay(50);  // add a delay to decrease sensitivity.
+
 }
