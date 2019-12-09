@@ -236,6 +236,11 @@ void spinMotorR(int motorSpeedR);
         motorSpeedR = SPEEDr;
       }
 
+     //If the front sensor detects something, go to label
+     if(Exits == 1 && analogRead(A1) > tooclose);
+     {goto Label;
+     };
+
      //if on the line drive left and right at the same speed (left is CCW / right is CW)
     if(center.read() > LINETHRESHOLDc && left.read() < LINETHRESHOLDl && right.read() < LINETHRESHOLDr)
     {
