@@ -22,9 +22,9 @@ RedBotSensor left = RedBotSensor(A5);  // initialize a right sensor object on A7
 #define LINETHRESHOLDl 980      //good 990
 #define LINETHRESHOLDr 800      //good 700
 #define LINETHRESHOLDc 980      //good 850
-#define SPEEDr 105    // sets the nominal speed. Set to any number from 0 - 255.  //140
-#define SPEEDl 110       //145
-#define TURN 20         //good 45
+#define SPEEDr 105*0    // sets the nominal speed. Set to any number from 0 - 255.  //140
+#define SPEEDl 110*0       //145
+#define TURN 20*0         //good 45
 
 RedBotMotors motors;
 int motorSpeedR = 0;
@@ -88,7 +88,7 @@ void spinMotorR(int motorSpeedR);
   analogWrite(PWMA, abs(motorSpeedL));
   analogWrite(PWMB, abs(motorSpeedR));
 
-
+/*
   Serial.print(left.read());                          //The rest is from the line follower
     Serial.print("\t");  // tab character
     Serial.print(center.read());
@@ -99,24 +99,24 @@ void spinMotorR(int motorSpeedR);
     Serial.println(motorSpeedL);
     Serial.print("Motor SpeedR: ");
     Serial.println(motorSpeedR);
-   
-/*
-  Serial.println("Right: ");
+   */
+
+ // Serial.println("Right: ");
   Serial.println(analogRead(A0));
 
-  Serial.println("Front: ");
+  /*Serial.println("Front: ");
   Serial.println(analogRead(A1));
 
   Serial.println("Left: ");
-  Serial.println(analogRead(A2));
-*/
+  Serial.println(analogRead(A2)); */
+
 
 
  {
    //if on the line drive left and right at the same speed (left is CCW / right is CW)
     if (center.read() > LINETHRESHOLDc && right.read() < LINETHRESHOLDr && left.read() < LINETHRESHOLDl)
     {
-    ;Serial.print("forward");
+    //;Serial.print("forward");
     Serial.println();   
         motorSpeedL = SPEEDl; 
         motorSpeedR = SPEEDr;
@@ -126,7 +126,7 @@ void spinMotorR(int motorSpeedR);
  // if the line is under the right sensor, adjust relative speeds to turn to the right
     if(right.read() > LINETHRESHOLDr)
     {
-       ;Serial.print("right");
+       //;Serial.print("right");
        Serial.println();
         motorSpeedL = (SPEEDl + TURN);
         motorSpeedR = (0);
@@ -136,7 +136,7 @@ void spinMotorR(int motorSpeedR);
  // if the line is under the left sensor, adjust relative speeds to turn to the left
     if(left.read() > LINETHRESHOLDl)
     {
-       ;Serial.print("left");
+       //;Serial.print("left");
        Serial.println();
         motorSpeedL = (0);
         motorSpeedR = SPEEDr + TURN;
@@ -145,7 +145,7 @@ void spinMotorR(int motorSpeedR);
 
    if(right.read() > LINETHRESHOLDr && center.read() > LINETHRESHOLDc && left.read() > LINETHRESHOLDl)
     {
-      ;Serial.print("Highway Forward");
+      //;Serial.print("Highway Forward");
       Serial.println();
         motorSpeedL = 1.5*SPEEDl; 
         motorSpeedR = 1.5*SPEEDr;
