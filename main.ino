@@ -232,7 +232,7 @@ void spinMotorR(int motorSpeedR);
         motorSpeedR = SPEEDr;
     }
  // if the line is under the right sensor, adjust relative speeds to turn to the right
-    else if(right.read() > LINETHRESHOLDr)
+    if(right.read() > LINETHRESHOLDr && center.read() < LINETHRESHOLDc && left.read() < LINETHRESHOLDl)
     {
            Highway = 0;
         Serial.print("right");
@@ -241,7 +241,7 @@ void spinMotorR(int motorSpeedR);
     }
 
  // if the line is under the left sensor, adjust relative speeds to turn to the left
-    else if(left.read() > LINETHRESHOLDl)
+    if(left.read() > LINETHRESHOLDl && right.read() < LINETHRESHOLDr && center.read() < LINETHRESHOLDc)
     {
            Highway = 0;
         Serial.print("left");
@@ -250,7 +250,7 @@ void spinMotorR(int motorSpeedR);
     }
 
  // if line is under the left and center sensor, make a sharp left turn
-   else if(left.read() > LINETHRESHOLDl && center.read() > LINETHRESHOLDc)
+   if(left.read() > LINETHRESHOLDl && center.read() > LINETHRESHOLDc && right.read() < LINETHRESHOLDr)
     {
            Highway = 0;
         Serial.print("sharp left");
@@ -258,7 +258,7 @@ void spinMotorR(int motorSpeedR);
         motorSpeedR = SPEEDr + 1.4*TURN;
     }
  // if line is under the right and center sensor, make a sharp right turn
-   else if(right.read() > LINETHRESHOLDr && center.read() > LINETHRESHOLDc)
+   else if(right.read() > LINETHRESHOLDr && center.read() > LINETHRESHOLDc && left.read() < LINETHRESHOLDl)
     {
            Highway = 0;
         Serial.print("sharp right");
