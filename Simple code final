@@ -1,0 +1,184 @@
+const int AIN1 = 13;
+const int AIN2 = 12;
+const int PWMA = 11;
+const int BIN1 = 8;
+const int BIN2 = 9;
+const int PWMB = 10;
+int switchPin = 7;
+int tooclose = 659;
+int Blocked = 0;
+
+int leftmax = 950;
+int leftmin = 900;
+int centermax = 960;
+int centermin = 900;
+int rightmax = 650;
+int rightmin = 590;
+
+#include <RedBot.h>
+
+RedBotSensor right = RedBotSensor(A3);   // initialize a left sensor object on A3
+RedBotSensor center = RedBotSensor(A4); // initialize a center sensor object on A6
+RedBotSensor left = RedBotSensor(A5);  // initialize a right sensor object on A7
+
+// constants that are used in the code. LINETHRESHOLD is the level to detect 
+// if the sensor is on the line or not. If the sensor value is greater than this
+// the sensor is above a DARK line.
+//
+// SPEED sets the nominal speed
+
+#define LINETHRESHOLDl 980      //good 990
+#define LINETHRESHOLDr 800      //good 700
+#define LINETHRESHOLDc 980      //good 850
+#define SPEEDr 105    // sets the nominal speed. Set to any number from 0 - 255.  //105
+#define SPEEDl 110       //110
+#define TURN 20         //good 20
+
+RedBotMotors motors;
+int motorSpeedR = 0;
+int motorSpeedL = 0;
+
+
+void setup() {
+  pinMode(switchPin, INPUT_PULLUP);
+  pinMode(AIN1, OUTPUT);
+  pinMode(AIN2, OUTPUT);
+  pinMode(PWMA, OUTPUT);
+  pinMode(BIN1, OUTPUT);
+  pinMode(BIN2, OUTPUT);
+  pinMode(PWMB, OUTPUT);
+  Serial.begin(9600);
+  Serial.println("Enter motor speed (0-255)... ");
+
+  Serial.begin(9600);
+    Serial.println("Welcome to experiment 6.2 - Line Following");         //From line follower
+    Serial.println("------------------------------------------");
+    delay(2000);
+    Serial.println("IR Sensor Readings: ");
+    delay(500);
+}
+
+
+void loop() {
+
+  if(Serial.available() > 0){
+    
+    motorSpeedR = Serial.parseInt();        
+    motorSpeedL = Serial.parseInt();  
+  }
+  
+
+void spinMotorL(int motorSpeedL); 
+void spinMotorR(int motorSpeedR);
+{
+  if(motorSpeedL > 0){
+    digitalWrite(AIN1, HIGH);
+    digitalWrite(AIN2, LOW);
+  } else if(motorSpeedL < 0){
+    digitalWrite(AIN1, LOW);
+    digitalWrite(AIN2, HIGH);
+  } else{
+    digitalWrite(AIN1, LOW);
+    digitalWrite(AIN2, LOW);
+  }
+}
+  {
+  if(motorSpeedR > 0){
+    digitalWrite(BIN1, HIGH);
+    digitalWrite(BIN2, LOW);
+  } else if(motorSpeedR < 0){
+    digitalWrite(BIN1, LOW);
+    digitalWrite(BIN2, HIGH);
+  } else{
+    digitalWrite(BIN1, LOW);
+    digitalWrite(BIN2, LOW);
+  }
+  analogWrite(PWMA, abs(motorSpeedL));
+  analogWrite(PWMB, abs(motorSpeedR));
+
+/*
+  Serial.print(left.read());                          //The rest is from the line follower
+    Serial.print("\t");  // tab character
+    Serial.print(center.read());
+    Serial.print("\t");  // tab character
+    Serial.print(right.read());
+    Serial.println();
+    Serial.print("Motor SpeedL: ");
+    Serial.println(motorSpeedL);
+    Serial.print("Motor SpeedR: ");
+    Serial.println(motorSpeedR);
+   */
+
+ // Serial.println("Right: ");
+  //Serial.println(analogRead(A0));
+
+  /*Serial.println("Front: ");
+  Serial.println(analogRead(A1));
+
+  Serial.println("Left: ");
+  Serial.println(analogRead(A2)); */
+
+
+
+ {
+   //if on the line drive left and right at the same speed (left is CCW / right is CW)
+    if (center.read() > LINETHRESHOLDc && right.read() < LINETHRESHOLDr && left.read() < LINETHRESHOLDl)
+    {
+    //;Serial.print("forward");
+    Serial.println(); 
+      // Blocked = 0;  
+        motorSpeedL = SPEEDl; 
+        motorSpeedR = SPEEDr;
+    }
+
+    
+ // if the line is under the right sensor, adjust relative speeds to turn to the right
+    if(right.read() > LINETHRESHOLDr)
+    {
+       //;Serial.print("right");
+       Serial.println();
+        //  Blocked = 0;
+        motorSpeedL = (SPEEDl + TURN);
+        motorSpeedR = (0);
+    }
+
+
+ // if the line is under the left sensor, adjust relative speeds to turn to the left
+    if(left.read() > LINETHRESHOLDl)
+    {
+       //;Serial.print("left");
+       Serial.println();
+         // Blocked = 0;
+        motorSpeedL = (0);
+        motorSpeedR = SPEEDr + TURN;
+    }
+
+
+   if(right.read() > LINETHRESHOLDr && center.read() > LINETHRESHOLDc && left.read() > LINETHRESHOLDl)
+    {
+      //;Serial.print("Highway Forward");
+      Serial.println();
+       // Blocked = 0;
+        motorSpeedL = 1.5*SPEEDl; 
+        motorSpeedR = 1.5*SPEEDr;
+    }
+ }
+  if(right.read() < LINETHRESHOLDr && center.read() < LINETHRESHOLDc && left.read() < LINETHRESHOLDl && analogRead(A1) > tooclose)
+    {
+      ;Serial.print("180 turn white");
+      Serial.println();
+      motorSpeedL = -1*SPEEDl;
+      motorSpeedR = SPEEDr;
+    }
+
+ //If RED, stop
+  if(leftmax > left.read() && left.read() > leftmin && centermax > center.read() && center.read() > centermin && rightmax > right.read() && right.read() > rightmin)
+  {
+    Serial.println("RED");
+  motorSpeedR = 0;
+  motorSpeedL = 0;
+  }
+    delay(0);  // add a delay to decrease sensitivity.
+  
+}
+}
