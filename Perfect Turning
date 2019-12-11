@@ -5,7 +5,8 @@ const int BIN1 = 8;
 const int BIN2 = 9;
 const int PWMB = 10;
 int switchPin = 7;
-int tooclose = 500;
+int tooclose = 659;
+int Blocked = 0;
 
 #include <RedBot.h>
 
@@ -22,9 +23,9 @@ RedBotSensor left = RedBotSensor(A5);  // initialize a right sensor object on A7
 #define LINETHRESHOLDl 980      //good 990
 #define LINETHRESHOLDr 800      //good 700
 #define LINETHRESHOLDc 980      //good 850
-#define SPEEDr 105*0    // sets the nominal speed. Set to any number from 0 - 255.  //140
-#define SPEEDl 110*0       //145
-#define TURN 20*0         //good 45
+#define SPEEDr 105    // sets the nominal speed. Set to any number from 0 - 255.  //105
+#define SPEEDl 110       //110
+#define TURN 20         //good 20
 
 RedBotMotors motors;
 int motorSpeedR = 0;
@@ -102,7 +103,7 @@ void spinMotorR(int motorSpeedR);
    */
 
  // Serial.println("Right: ");
-  Serial.println(analogRead(A0));
+  //Serial.println(analogRead(A0));
 
   /*Serial.println("Front: ");
   Serial.println(analogRead(A1));
@@ -117,7 +118,8 @@ void spinMotorR(int motorSpeedR);
     if (center.read() > LINETHRESHOLDc && right.read() < LINETHRESHOLDr && left.read() < LINETHRESHOLDl)
     {
     //;Serial.print("forward");
-    Serial.println();   
+    Serial.println(); 
+      // Blocked = 0;  
         motorSpeedL = SPEEDl; 
         motorSpeedR = SPEEDr;
     }
@@ -128,6 +130,7 @@ void spinMotorR(int motorSpeedR);
     {
        //;Serial.print("right");
        Serial.println();
+        //  Blocked = 0;
         motorSpeedL = (SPEEDl + TURN);
         motorSpeedR = (0);
     }
@@ -138,6 +141,7 @@ void spinMotorR(int motorSpeedR);
     {
        //;Serial.print("left");
        Serial.println();
+         // Blocked = 0;
         motorSpeedL = (0);
         motorSpeedR = SPEEDr + TURN;
     }
@@ -147,38 +151,19 @@ void spinMotorR(int motorSpeedR);
     {
       //;Serial.print("Highway Forward");
       Serial.println();
+       // Blocked = 0;
         motorSpeedL = 1.5*SPEEDl; 
         motorSpeedR = 1.5*SPEEDr;
     }
  }
-    
-   
-        //If all three sensors are white, base motors on distance (Safe distance)
-    if(right.read() < LINETHRESHOLDr && center.read() < LINETHRESHOLDc && left.read() < LINETHRESHOLDl && analogRead(A2) < tooclose && analogRead(A0) < tooclose )
-      { motorSpeedL = SPEEDl;
-        motorSpeedR = SPEEDr;
-      }
+  if(right.read() < LINETHRESHOLDr && center.read() < LINETHRESHOLDc && left.read() < LINETHRESHOLDl && analogRead(A1) > tooclose)
+    {
+      ;Serial.print("180 turn white");
+      Serial.println();
+      motorSpeedL = -1*SPEEDl;
+      motorSpeedR = SPEEDr;
+    }
 
-      
-       //If all three sensors are white, base motors on distance (Too close to the left, turn right)
-    if(right.read() < LINETHRESHOLDr && center.read() < LINETHRESHOLDc && left.read() < LINETHRESHOLDl && analogRead(A2) > tooclose )
-      { motorSpeedL = (SPEEDl + TURN);
-        motorSpeedR = (SPEEDr - TURN);
-      }
-
-
-      //If all three sensors are white, base motors on distance (Too close to the right, turn left)
-    if(right.read() < LINETHRESHOLDr && center.read() < LINETHRESHOLDc && left.read() < LINETHRESHOLDl && analogRead(A0) > tooclose )
-      { motorSpeedL = (SPEEDl - TURN);
-        motorSpeedR = (SPEEDr + TURN);
-      }
-
-
-      //If all three sensors are white, base motors on distance (Too close both sides)
-    if(right.read() < LINETHRESHOLDr && center.read() < LINETHRESHOLDc && left.read() < LINETHRESHOLDl && analogRead(A2) > tooclose && analogRead(A0) > tooclose )
-      { motorSpeedL = SPEEDl;
-        motorSpeedR = SPEEDr;
-      }
 
     delay(0);  // add a delay to decrease sensitivity.
   
