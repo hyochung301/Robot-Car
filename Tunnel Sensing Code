@@ -1,0 +1,306 @@
+const int AIN1 = 13;
+const int AIN2 = 12;
+const int PWMA = 11;
+const int BIN1 = 8;
+const int BIN2 = 9;
+const int PWMB = 10;
+int switchPin = 7;
+int tooclose = 500;
+
+//---------------------------------------------------------------- 
+
+const int numReadings = 30;
+
+int readings[numReadings];      // the readings from the analog input
+int readIndex = 0;              // the index of the current reading
+int total = 0;                  // the running total
+int average = 0;                // the average
+
+int inputPin = A0;
+
+//-------------------------------------------------------------------
+
+int Creadings[numReadings];      // the readings from the analog input
+int CreadIndex = 0;              // the index of the current reading
+int Ctotal = 0;                  // the running total
+int Caverage = 0;                // the average
+
+int CinputPin = A1;
+
+//-------------------------------------------------------------------
+
+int Lreadings[numReadings];      // the readings from the analog input
+int LreadIndex = 0;              // the index of the current reading
+int Ltotal = 0;                  // the running total
+int Laverage = 0;                // the average
+
+int LinputPin = A2;
+
+//-------------------------------------------------------------------
+
+#include <RedBot.h>
+
+RedBotSensor right = RedBotSensor(A3);   // initialize a left sensor object on A3
+RedBotSensor center = RedBotSensor(A4); // initialize a center sensor object on A6
+RedBotSensor left = RedBotSensor(A5);  // initialize a right sensor object on A7
+
+// constants that are used in the code. LINETHRESHOLD is the level to detect 
+// if the sensor is on the line or not. If the sensor value is greater than this
+// the sensor is above a DARK line.
+//
+// SPEED sets the nominal speed
+
+#define LINETHRESHOLDl 980      //good 990
+#define LINETHRESHOLDr 800      //good 700
+#define LINETHRESHOLDc 980      //good 850
+#define SPEEDr 140    // sets the nominal speed. Set to any number from 0 - 255.  //140
+#define SPEEDl 145       //145
+#define TURN 40         //good 45
+
+RedBotMotors motors;
+int motorSpeedR = 0;
+int motorSpeedL = 0;
+
+
+void setup() {
+  pinMode(switchPin, INPUT_PULLUP);
+  pinMode(AIN1, OUTPUT);
+  pinMode(AIN2, OUTPUT);
+  pinMode(PWMA, OUTPUT);
+  pinMode(BIN1, OUTPUT);
+  pinMode(BIN2, OUTPUT);
+  pinMode(PWMB, OUTPUT);
+  
+  Serial.begin(9600);
+    Serial.println("Welcome to experiment 6.2 - Line Following");         //From line follower
+    Serial.println("------------------------------------------");
+    delay(2000);
+    Serial.println("IR Sensor Readings: ");
+    delay(500);
+//-------------------------------------------------------------------------
+  // initialize all the readings to 0:
+  for (int thisReading = 0; thisReading < numReadings; thisReading++) {
+    readings[thisReading] = 0;
+
+  }
+//------------------------------------------------------------------    
+   // initialize all the readings to 0:
+  for (int CthisReading = 0; CthisReading < numReadings; CthisReading++) {
+    Creadings[CthisReading] = 0;
+
+  }
+//---------------------------------------------------------------
+
+ // initialize all the readings to 0:
+  for (int LthisReading = 0; LthisReading < numReadings; LthisReading++) {
+    Lreadings[LthisReading] = 0;
+
+  }
+//---------------------------------------------------------------
+
+}
+
+
+void loop() {
+
+  if(Serial.available() > 0){
+    
+    motorSpeedR = Serial.parseInt();        
+    motorSpeedL = Serial.parseInt();  
+  }
+  
+
+void spinMotorL(int motorSpeedL); 
+void spinMotorR(int motorSpeedR);
+{
+  if(motorSpeedL > 0){
+    digitalWrite(AIN1, HIGH);
+    digitalWrite(AIN2, LOW);
+  } else if(motorSpeedL < 0){
+    digitalWrite(AIN1, LOW);
+    digitalWrite(AIN2, HIGH);
+  } else{
+    digitalWrite(AIN1, LOW);
+    digitalWrite(AIN2, LOW);
+  }
+}
+  {
+  if(motorSpeedR > 0){
+    digitalWrite(BIN1, HIGH);
+    digitalWrite(BIN2, LOW);
+  } else if(motorSpeedR < 0){
+    digitalWrite(BIN1, LOW);
+    digitalWrite(BIN2, HIGH);
+  } else{
+    digitalWrite(BIN1, LOW);
+    digitalWrite(BIN2, LOW);
+  }
+  analogWrite(PWMA, abs(motorSpeedL));
+  analogWrite(PWMB, abs(motorSpeedR));
+
+/*
+  Serial.print(left.read());                          //The rest is from the line follower
+    Serial.print("\t");  // tab character
+    Serial.print(center.read());
+    Serial.print("\t");  // tab character
+    Serial.print(right.read());
+    Serial.println();
+    Serial.print("Motor SpeedL: ");
+    Serial.println(motorSpeedL);
+    Serial.print("Motor SpeedR: ");
+    Serial.println(motorSpeedR);
+   */
+
+  //----------------------------------------------------
+  
+ // Serial.println("Right: ");
+ // Serial.println(analogRead(A0));
+
+  /*Serial.println("Front: ");
+  Serial.println(analogRead(A1));
+
+  Serial.println("Left: ");
+  Serial.println(analogRead(A2)); */
+
+  // -------------------------------------------------
+   // subtract the last reading:
+  total = total - readings[readIndex];
+  // read from the sensor:
+  readings[readIndex] = analogRead(A0);
+  // add the reading to the total:
+  total = total + readings[readIndex];
+  // advance to the next position in the array:
+  readIndex = readIndex + 1;
+
+  // if we're at the end of the array...
+  if (readIndex >= numReadings) {
+    // ...wrap around to the beginning:
+    readIndex = 0;
+  }
+
+  // calculate the average:
+  average = total / numReadings;
+  // send it to the computer as ASCII digits
+  Serial.println(average);
+  delay(1);        // delay in between reads for stability
+
+  //------------------------------------------------------
+
+   // subtract the last reading:
+  Ctotal = Ctotal - Creadings[CreadIndex];
+  // read from the sensor:
+  Creadings[CreadIndex] = analogRead(A1);
+  // add the reading to the total:
+  Ctotal = Ctotal + Creadings[CreadIndex];
+  // advance to the next position in the array:
+  CreadIndex = CreadIndex + 1;
+
+  // if we're at the end of the array...
+  if (CreadIndex >= numReadings) {
+    // ...wrap around to the beginning:
+    CreadIndex = 0;
+  }
+
+  // calculate the average:
+  Caverage = Ctotal / numReadings;
+  // send it to the computer as ASCII digits
+ // Serial.println(Caverage);
+  delay(1);        // delay in between reads for stability
+  
+//--------------------------------------------------------
+
+ // subtract the last reading:
+  Ltotal = Ltotal - Lreadings[LreadIndex];
+  // read from the sensor:
+  Lreadings[LreadIndex] = analogRead(A2);
+  // add the reading to the total:
+  Ltotal = Ltotal + Lreadings[LreadIndex];
+  // advance to the next position in the array:
+  LreadIndex = LreadIndex + 1;
+
+  // if we're at the end of the array...
+  if (LreadIndex >= numReadings) {
+    // ...wrap around to the beginning:
+    LreadIndex = 0;
+  }
+
+  // calculate the average:
+  Laverage = Ltotal / numReadings;
+  // send it to the computer as ASCII digits
+ // Serial.println(Laverage);
+  delay(1);        // delay in between reads for stability
+  
+//--------------------------------------------------------
+
+ {
+   //if on the line drive left and right at the same speed (left is CCW / right is CW)
+    if (center.read() > LINETHRESHOLDc && right.read() < LINETHRESHOLDr && left.read() < LINETHRESHOLDl)
+    {
+    //;Serial.print("forward");
+    Serial.println();   
+        motorSpeedL = SPEEDl; 
+        motorSpeedR = SPEEDr;
+    }
+
+    
+ // if the line is under the right sensor, adjust relative speeds to turn to the right
+    if(right.read() > LINETHRESHOLDr)
+    {
+       //;Serial.print("right");
+       Serial.println();
+        motorSpeedL = (SPEEDl + TURN);
+        motorSpeedR = (0);
+    }
+
+
+ // if the line is under the left sensor, adjust relative speeds to turn to the left
+    if(left.read() > LINETHRESHOLDl)
+    {
+       //;Serial.print("left");
+       Serial.println();
+        motorSpeedL = (0);
+        motorSpeedR = SPEEDr + TURN;
+    }
+
+
+   if(right.read() > LINETHRESHOLDr && center.read() > LINETHRESHOLDc && left.read() > LINETHRESHOLDl)
+    {
+      //;Serial.print("Highway Forward");
+      Serial.println();
+        motorSpeedL = 1.5*SPEEDl; 
+        motorSpeedR = 1.5*SPEEDr;
+    }
+ }
+    
+   
+        //If all three sensors are white, base motors on distance (Safe distance)
+    if(right.read() < LINETHRESHOLDr && center.read() < LINETHRESHOLDc && left.read() < LINETHRESHOLDl && average < tooclose && Laverage < tooclose )
+      { motorSpeedL = SPEEDl;
+        motorSpeedR = SPEEDr;
+      }
+
+      
+       //If all three sensors are white, base motors on distance (Too close to the left, turn right)
+    if(right.read() < LINETHRESHOLDr && center.read() < LINETHRESHOLDc && left.read() < LINETHRESHOLDl && Laverage > tooclose )
+      { motorSpeedL = (SPEEDl + TURN);
+        motorSpeedR = (SPEEDr - TURN);
+      }
+
+
+      //If all three sensors are white, base motors on distance (Too close to the right, turn left)
+    if(right.read() < LINETHRESHOLDr && center.read() < LINETHRESHOLDc && left.read() < LINETHRESHOLDl && average > tooclose )
+      { motorSpeedL = (SPEEDl - TURN);
+        motorSpeedR = (SPEEDr + TURN);
+      }
+
+
+      //If all three sensors are white, base motors on distance (Too close both sides)
+    if(right.read() < LINETHRESHOLDr && center.read() < LINETHRESHOLDc && left.read() < LINETHRESHOLDl && average > tooclose && Laverage > tooclose )
+      { motorSpeedL = SPEEDl;
+        motorSpeedR = SPEEDr;
+      }
+
+    delay(1);  // add a delay to decrease sensitivity.
+  
+}
+}
